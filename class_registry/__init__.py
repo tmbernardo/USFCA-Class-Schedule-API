@@ -1,3 +1,4 @@
+from class_registry import dbhandler as db
 from flask import Flask
 
 import markdown
@@ -9,6 +10,8 @@ app = Flask(__name__)
 def index():
     """Present some documentation"""
 
+    db.create_tables()
+
     # Open the README file
     with open(os.path.dirname(app.root_path) + '/README.md', 'r') as markdown_file:
 
@@ -17,3 +20,6 @@ def index():
 
         # Convert to HTML
         return markdown.markdown(content)
+
+if __name__ == '__main__':
+    app.run(debug = True)
