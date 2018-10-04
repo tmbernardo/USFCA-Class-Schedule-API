@@ -4,6 +4,7 @@ from flask_restful import Resource, Api, reqparse
 
 import json
 import markdown
+import re
 import os
 import sys
 import time
@@ -44,7 +45,7 @@ class CourseList(Resource):
     def post(self):
         parser = reqparse.RequestParser()
 
-        parser.add_argument('id', required = True)
+        parser.add_argument('crn', required = True)
         parser.add_argument('title', required = True)
         parser.add_argument('course_num', required = True)
         parser.add_argument('section_num', required = True)
@@ -60,4 +61,42 @@ class CourseList(Resource):
         
         return {'message': 'Course registered', 'data': args}, 201
 
+class InstructorList(Resource):
+    def get(self):
+        return {'message': 'Success', 'data': db.get_instructors()}, 200
+
+    def post(self):
+        parser = reqparse.RequestParser()
+
+        parser.add_argument('name', required = True)
+        
+        args = parser.parse_args()
+        db.insert_instructor(args)
+
+        return{'message': 'Success', 'data': args}, 201
+
+class Instructor(Resource):
+    def get(self, name):
+        cleaned = re.sub("[\W+]", "_", name)
+        inst = db.instructor_exists(cleaned)
+
+        if not inst:
+            return {'message': 'Instructor not found', 'data': {}}, 404
+
+        return {'message': 'Success' , 'data': inst.serialize()}, 200
+
+class Course(Resource):
+    def get(self, crn):
+        course = db.course_exists(crn)
+
+        if not course:
+            return {'message': 'Course not found', 'data': {}}, 404
+
+        return {'message': 'Course found', 'data': course.serialize()}, 200
+
+
 api.add_resource(CourseList, '/courses')
+api.add_resource(InstructorList, '/instructors')
+api.add_resource(Instructor, '/instructors/<string:name>')
+api.add_resource(Course, '/courses/<int:crn>')
+

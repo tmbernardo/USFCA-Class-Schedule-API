@@ -14,6 +14,9 @@ class Instructors(Base):
     __tablename__ = "instructors"
     id = Column(Integer, primary_key=True)
     name = Column(String(64), nullable=False, unique=True)
+    
+    def serialize(self):
+        return { 'name' : self.name }
 
 # Departments
 class Departments(Base):
@@ -31,6 +34,7 @@ class Students(Base):
 class Courses(Base):
     __tablename__ = "courses"
     id = Column(Integer, primary_key=True)
+    crn = Column(Integer, unique=True, nullable=False)
     title = Column(String(64), nullable=False)
     course_num = Column(Integer, nullable=False)
     section_num = Column(Integer, nullable=False)
@@ -42,7 +46,7 @@ class Courses(Base):
 
     def serialize(self):
         return {
-                'id' : self.id,
+                'crn' : self.crn,
                 'title' : self.title,
                 'course_num' : self.course_num,
                 'section_num' : self.section_num,
@@ -62,21 +66,30 @@ def create_tables(sess=start_sess()):
     sess.commit()
     sess.close()
 
+def course_exists(crn, sess=start_sess()):
+    return sess.query(Courses).filter(Courses.crn==crn).scalar()
+
 def instructor_exists(instructor, sess=start_sess()):
-    return sess.query(Instructors).filter(Instructors.name==instructor).scalar()
+    return sess.query(Instructors).filter(Instructors.name.like(instructor)).scalar()
 
 def dept_exists(dept, sess=start_sess()):
     return sess.query(Departments).filter(Departments.name==dept).scalar()
 
 def get_courses(sess=start_sess()):
     query = sess.query(Courses).all()
-    dump =  [ row.serialize() for row in query ]
+    dump =  [row.serialize() for row in query]
+    sess.close()
+    return dump
+
+def get_instructors(sess=start_sess()):
+    query = sess.query(Instructors).all()
+    dump = [row.serialize() for row in query]
     sess.close()
     return dump
 
 def insert_course(args, sess=start_sess()):
     course = Courses(
-            id = args['id'],
+            crn = args['crn'],
             title = args['title'],
             course_num = args['course_num'],
             section_num = args['section_num'],
@@ -103,6 +116,13 @@ def insert_course(args, sess=start_sess()):
     sess.commit()
     sess.close()
     return True
+
+def insert_instructor(args, sess=start_sess()):
+    inst = Instructors(name = args['name'])
+
+    sess.add(inst)
+    sess.commit()
+    sess.close()
 
 def insert_student(value, sess=start_sess()):
     user = Students(name=value)
