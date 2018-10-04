@@ -4,6 +4,7 @@ from sqlalchemy import Table, Column, Integer, BigInteger, String, ForeignKey, S
 
 import os
 import sqlalchemy as sql
+import json
 
 Base = declarative_base()
 engine = sql.create_engine('mysql+mysqlconnector://root:password@db:3306/usf')
@@ -36,8 +37,6 @@ class Courses(Base):
     section_num = Column(Integer, nullable=False)
     capacity = Column(Integer, nullable=False)
     actual = Column(Integer, nullable=False)
-    time = Column(String(16), nullable=False)
-    days = Column(String(7), nullable=False)
     course_url = Column(String(512), nullable=False)
     instructor = Column(Integer, ForeignKey('instructors.id'))
     dept = Column(Integer, ForeignKey('departments.id'))
@@ -50,6 +49,12 @@ def create_tables(sess=start_sess()):
     Base.metadata.create_all(engine)
     sess.commit()
     sess.close()
+
+def get_classes(sess=start_sess()):
+    query = sess.query(Courses).all()
+    dump =  json.dumps([ row._asdict() for row in query ])
+    sess.close()
+    return dump
 
 def insert_student(value, sess=start_sess()):
     user = Students(name=value)

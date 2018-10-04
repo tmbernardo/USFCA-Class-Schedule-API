@@ -1,5 +1,6 @@
 from class_registry import dbhandler as db
 from flask import Flask
+from flask_restful import Resource, Api, reqparse
 
 import markdown
 import os
@@ -8,6 +9,7 @@ import time
 
 app = Flask(__name__)
 
+api = Api(app)
 
 @app.before_first_request
 def _run_on_start():
@@ -33,6 +35,8 @@ def index():
         # Convert to HTML
         return markdown.markdown(content)
 
+class CourseList(Resource):
+    def get(self):
+        return {'message': 'Success' , 'data': db.get_classes()}, 200
 
-if __name__ == "__main__":
-    app.run(debug = True)
+api.add_resource(CourseList, '/courses')
