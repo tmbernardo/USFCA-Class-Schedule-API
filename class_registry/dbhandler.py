@@ -23,6 +23,9 @@ class Departments(Base):
     __tablename__ = "departments"
     id = Column(Integer, primary_key=True)
     name = Column(String(64), nullable=False, unique=True)
+    
+    def serialize(self):
+        return { 'name' : self.name }
 
 # Students/Users
 class Students(Base):
@@ -73,7 +76,7 @@ def instructor_exists(instructor, sess=start_sess()):
     return sess.query(Instructors).filter(Instructors.name.like(instructor)).scalar()
 
 def dept_exists(dept, sess=start_sess()):
-    return sess.query(Departments).filter(Departments.name==dept).scalar()
+    return sess.query(Departments).filter(Departments.name.like(dept)).scalar()
 
 def get_courses(sess=start_sess()):
     query = sess.query(Courses).all()
@@ -84,6 +87,12 @@ def get_courses(sess=start_sess()):
 def get_instructors(sess=start_sess()):
     query = sess.query(Instructors).all()
     dump = [row.serialize() for row in query]
+    sess.close()
+    return dump
+
+def get_depts(sess=start_sess()):
+    query = sess.query(Departments).all()
+    dump =  [row.serialize() for row in query]
     sess.close()
     return dump
 
@@ -121,6 +130,13 @@ def insert_instructor(args, sess=start_sess()):
     inst = Instructors(name = args['name'])
 
     sess.add(inst)
+    sess.commit()
+    sess.close()
+
+def insert_dept(args, sess=start_sess()):
+    dept = Departments(name = args['name'])
+
+    sess.add(dept)
     sess.commit()
     sess.close()
 

@@ -75,15 +75,19 @@ class InstructorList(Resource):
 
         return{'message': 'Success', 'data': args}, 201
 
-class Instructor(Resource):
-    def get(self, name):
-        cleaned = re.sub("[\W+]", "_", name)
-        inst = db.instructor_exists(cleaned)
+class DepartmentList(Resource):
+    def get(self):
+        return {'message': 'Success', 'data': db.get_depts()}, 200
+    
+    def post(self):
+        parser = reqparse.RequestParser()
 
-        if not inst:
-            return {'message': 'Instructor not found', 'data': {}}, 404
+        parser.add_argument('name', required = True)
+        
+        args = parser.parse_args()
+        db.insert_dept(args)
 
-        return {'message': 'Success' , 'data': inst.serialize()}, 200
+        return{'message': 'Success', 'data': args}, 201
 
 class Course(Resource):
     def get(self, crn):
@@ -94,9 +98,30 @@ class Course(Resource):
 
         return {'message': 'Course found', 'data': course.serialize()}, 200
 
+class Instructor(Resource):
+    def get(self, name):
+        cleaned = re.sub("[\W+]", "_", name)
+        inst = db.instructor_exists(cleaned)
+
+        if not inst:
+            return {'message': 'Instructor not found', 'data': {}}, 404
+
+        return {'message': 'Success' , 'data': inst.serialize()}, 200
+
+class Department(Resource):
+    def get(self, name):
+        cleaned = re.sub("[\W+]", "_", name)
+        dept = db.dept_exists(cleaned)
+
+        if not dept:
+            return {'message': 'Department not found', 'data': {}}, 404
+
+        return {'message': 'Success' , 'data': dept.serialize()}, 200
 
 api.add_resource(CourseList, '/courses')
 api.add_resource(InstructorList, '/instructors')
+api.add_resource(DepartmentList, '/departments')
 api.add_resource(Instructor, '/instructors/<string:name>')
 api.add_resource(Course, '/courses/<int:crn>')
+api.add_resource(Department, '/departments/<string:name>')
 
