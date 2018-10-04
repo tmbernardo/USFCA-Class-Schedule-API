@@ -147,4 +147,41 @@ def insert_student(value, sess=start_sess()):
     sess.close()
     return True
 
+def delete_course(crn, sess=start_sess()):
+    sess = start_sess()
+    course = course_exists(crn, sess)
 
+    if course:
+        sess.delete(course)
+        sess.commit()
+        sess.close()
+        return course
+
+    sess.close()
+    return course
+
+def delete_inst(name, sess=start_sess()):
+    sess = start_sess()
+    inst = instructor_exists(name, sess)
+
+    if inst:
+        sess.delete(inst)
+        sess.commit()
+        sess.close()
+        return True
+
+    sess.close()
+    return False
+
+def delete_dept(name, sess=start_sess()):
+    sess = start_sess()
+    dept = dept_exists(name, sess)
+
+    if dept:
+        sess.delete(dept)
+        sess.commit()
+        sess.close()
+        return True
+
+    sess.close()
+    return False

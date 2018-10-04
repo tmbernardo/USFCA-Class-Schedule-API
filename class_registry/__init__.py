@@ -98,6 +98,10 @@ class Course(Resource):
 
         return {'message': 'Course found', 'data': course.serialize()}, 200
 
+    def delete(self, crn):
+        db.delete_course(crn)
+        return '', 204
+
 class Instructor(Resource):
     def get(self, name):
         cleaned = re.sub("[\W+]", "_", name)
@@ -108,6 +112,10 @@ class Instructor(Resource):
 
         return {'message': 'Success' , 'data': inst.serialize()}, 200
 
+    def delete(self, name):
+        db.delete_inst(name)
+        return '', 204 
+
 class Department(Resource):
     def get(self, name):
         cleaned = re.sub("[\W+]", "_", name)
@@ -117,6 +125,10 @@ class Department(Resource):
             return {'message': 'Department not found', 'data': {}}, 404
 
         return {'message': 'Success' , 'data': dept.serialize()}, 200
+
+    def delete(self, name):
+        db.delete_dept(name)
+        return '', 204 
 
 api.add_resource(CourseList, '/courses')
 api.add_resource(InstructorList, '/instructors')
