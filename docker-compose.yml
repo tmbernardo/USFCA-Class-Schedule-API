@@ -21,3 +21,5 @@ services:
             - .:/usr/src/app
         ports:
             - 5000:80
+        environment:
+            WHAT_HOSTS: db:3306

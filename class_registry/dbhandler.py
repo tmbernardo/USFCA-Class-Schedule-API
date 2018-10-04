@@ -8,7 +8,7 @@ import sqlalchemy as sql
 Base = declarative_base()
 engine = sql.create_engine('mysql+mysqlconnector://root:password@db:3306/usf')
 
-# Teachers
+# Instructors
 class Instructors(Base):
     __tablename__ = "instructors"
     id = Column(Integer, primary_key=True)
@@ -34,8 +34,11 @@ class Courses(Base):
     title = Column(String(128), nullable=False)
     course_num = Column(Integer, nullable=False)
     section_num = Column(Integer, nullable=False)
+    capacity = Column(Integer, nullable=False)
+    actual = Column(Integer, nullable=False)
     time = Column(String(16), nullable=False)
     days = Column(String(7), nullable=False)
+    course_url = Column(String(512), nullable=False)
     instructor = Column(Integer, ForeignKey('instructors.id'))
     dept = Column(Integer, ForeignKey('departments.id'))
 
@@ -43,17 +46,16 @@ def start_sess():
     Session = sessionmaker(bind=engine, autocommit=False)
     return Session()
 
-def create_tables():
-    sess = start_sess()
+def create_tables(sess=start_sess()):
     Base.metadata.create_all(engine)
     sess.commit()
     sess.close()
 
-def insert_user(value):
-    sess = start_sess()
-    
+def insert_student(value, sess=start_sess()):
     user = Students(name=value)
     sess.add(user)
     sess.commit()
     sess.close()
     return True
+
+
