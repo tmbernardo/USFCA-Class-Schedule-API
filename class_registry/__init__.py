@@ -10,12 +10,11 @@ import sys
 import time
 
 app = Flask(__name__)
-
 api = Api(app)
 
 @app.before_first_request
 def _run_on_start():
-    for _ in range(60):
+    for _ in range(30):
         try:
             db.create_tables()
             print('Database schema created', file=sys.stdout)
@@ -27,14 +26,10 @@ def _run_on_start():
 
 @app.route("/")
 def index():
-    """Present some documentation"""
-
     # Open the README file
     with open(os.path.dirname(app.root_path) + '/README.md', 'r') as markdown_file:
-
         # Read the content of the file
         content = markdown_file.read()
-
         # Convert to HTML
         return markdown.markdown(content)
 
@@ -81,12 +76,12 @@ class DepartmentList(Resource):
     
     def post(self):
         parser = reqparse.RequestParser()
-
+        
         parser.add_argument('name', required = True)
         
         args = parser.parse_args()
         db.insert_dept(args)
-
+        
         return{'message': 'Success', 'data': args}, 201
 
 class Course(Resource):
@@ -95,11 +90,21 @@ class Course(Resource):
 
         if not course:
             return {'message': 'Course not found', 'data': {}}, 404
-
         return {'message': 'Course found', 'data': course.serialize()}, 200
 
     def delete(self, crn):
         db.delete_course(crn)
+        return '', 204
+
+    def patch(self, crn):
+        parser = reqparse.RequestParser()
+        
+        parser.add_argument('actual', required = True)
+        
+        args = parser.parse_args()
+
+        if not db.update_actual(args['actual'], crn):
+            return {'message': 'Course not found', 'data': {}}, 404
         return '', 204
 
 class Instructor(Resource):
@@ -109,7 +114,6 @@ class Instructor(Resource):
 
         if not inst:
             return {'message': 'Instructor not found', 'data': {}}, 404
-
         return {'message': 'Success' , 'data': inst.serialize()}, 200
 
     def delete(self, name):
@@ -123,7 +127,6 @@ class Department(Resource):
 
         if not dept:
             return {'message': 'Department not found', 'data': {}}, 404
-
         return {'message': 'Success' , 'data': dept.serialize()}, 200
 
     def delete(self, name):
@@ -136,4 +139,3 @@ api.add_resource(DepartmentList, '/departments')
 api.add_resource(Instructor, '/instructors/<string:name>')
 api.add_resource(Course, '/courses/<int:crn>')
 api.add_resource(Department, '/departments/<string:name>')
-
