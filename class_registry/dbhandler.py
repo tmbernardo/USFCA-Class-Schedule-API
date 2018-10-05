@@ -14,18 +14,35 @@ class Instructors(Base):
     __tablename__ = "instructors"
     id = Column(Integer, primary_key=True)
     name = Column(String(64), nullable=False, unique=True)
+    courses = relationship("Courses", back_populates="instructor")
     
     def serialize(self):
-        return { 'name' : self.name }
+        return {'name' : self.name,
+                'courses': [{
+                    'name': course.title,
+                    'crn': course.crn,
+                    'course_num': course.course_num,
+                    'section_num': course.section_num
+                    } for course in self.courses]
+                }
 
 # Departments
 class Departments(Base):
     __tablename__ = "departments"
     id = Column(Integer, primary_key=True)
     name = Column(String(64), nullable=False, unique=True)
+    courses = relationship("Courses", back_populates="dept")
     
     def serialize(self):
-        return { 'name' : self.name }
+        return {'name' : self.name,
+                'courses': [{
+                    'name': course.title,
+                    'instructor': course.instructor.name,
+                    'crn': course.crn,
+                    'course_num': course.course_num,
+                    'section_num': course.section_num
+                    } for course in self.courses]
+                }
 
 # Students/Users
 class Students(Base):
@@ -44,8 +61,10 @@ class Courses(Base):
     capacity = Column(Integer, nullable=False)
     actual = Column(Integer, nullable=False)
     course_url = Column(String(256), nullable=False)
-    instructor = Column(Integer, ForeignKey('instructors.id'))
-    dept = Column(Integer, ForeignKey('departments.id'))
+    dept_id = Column(Integer, ForeignKey('departments.id'))
+    dept = relationship("Departments", back_populates="courses")
+    inst_id = Column(Integer, ForeignKey('instructors.id'))
+    instructor = relationship("Instructors", back_populates="courses")
 
     def serialize(self):
         return {
@@ -56,8 +75,8 @@ class Courses(Base):
                 'capacity' : self.capacity,
                 'actual' : self.actual,
                 'course_url' : self.course_url,
-                'instructor' : self.instructor,
-                'dept' : self.dept
+                'instructor' : self.instructor.name,
+                'dept' : self.dept.name
                 }
 
 def start_sess():
@@ -106,8 +125,8 @@ def insert_course(args, sess=start_sess()):
             actual = args['actual'],
             course_url = args['course_url'],
             )
-    inst = instructor_exists(args['instructor'])
-    dep = dept_exists(args['dept'])
+    inst = instructor_exists(args['instructor'], sess)
+    dep = dept_exists(args['dept'], sess)
 
     if not inst:
         inst = Instructors(name=args['instructor'])
@@ -119,8 +138,10 @@ def insert_course(args, sess=start_sess()):
         sess.add(dep)
         sess.commit()
 
-    course.instructor = inst.id
-    course.dept = dep.id
+    inst.courses.append(course)
+    dep.courses.append(course)
+    course.instructor = inst
+    course.dept = dep
     sess.add(course)
     sess.commit()
     sess.close()
@@ -128,14 +149,12 @@ def insert_course(args, sess=start_sess()):
 
 def insert_instructor(args, sess=start_sess()):
     inst = Instructors(name = args['name'])
-
     sess.add(inst)
     sess.commit()
     sess.close()
 
 def insert_dept(args, sess=start_sess()):
     dept = Departments(name = args['name'])
-
     sess.add(dept)
     sess.commit()
     sess.close()
