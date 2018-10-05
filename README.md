@@ -31,19 +31,9 @@ Subsequent response definitions will only detail the expected value of the `data
         "department": "CS",
         "course_num": "110",
         "section_num": "01",
-        "instructor": "Jeffrey Alain Johnson",
-        "time": "9:55 am - 11:40 am",
-        "days": "TR"
-    },
-    {
-        "ID": "40805",
-        "title": "Introduction to Computer Science I",
-        "department": "CS",
-        "course_num": "110",
-        "section_num": "02",
-        "instructor": "Beste Yuksel",
-        "time": "4:35 pm - 6:20 pm",
-        "days": "TR"
+        "actual": "20",
+        "capacity": "23",
+        "instructor": "Jeffrey Alain Johnson"
     }
 ]
 ```
@@ -61,9 +51,9 @@ Subsequent response definitions will only detail the expected value of the `data
 - `"department":string` education division for this class
 - `"course_num":integer` course number for this class
 - `"section_num":integer` section number for this class
+- `"actual":integer` number of students enrolled
+- `"capacity":integer` max number of students allowed to enroll
 - `"instructor":string` instructor for the class
-- `"time":string` time this class meets
-- `"days":string` days this class meets
 
 If a class with the given ID already exists, the existing class will be overwritten.
 
@@ -78,9 +68,9 @@ If a class with the given ID already exists, the existing class will be overwrit
     "department": "CS",
     "course_num": "110",
     "section_num": "01",
-    "instructor": "Jeffrey Alain Johnson",
-    "time": "9:55 am - 11:40 am",
-    "days": "TR"
+    "actual": "20",
+    "capacity": "23",
+    "instructor": "Jeffrey Alain Johnson"
 }
 ```
 
@@ -100,9 +90,9 @@ If a class with the given ID already exists, the existing class will be overwrit
     "department": "CS",
     "course_num": "110",
     "section_num": "01",
-    "instructor": "Jeffrey Alain Johnson",
-    "time": "9:55 am - 11:40 am",
-    "days": "TR"
+    "actual": "20",
+    "capacity": "23",
+    "instructor": "Jeffrey Alain Johnson"
 }
 ```
 
