@@ -18,7 +18,6 @@ class Instructors(Base):
     
     def serialize(self):
         return {'name': self.name,
-                'rating': self.rating, 
                 'courses': [{
                     'name': course.title,
                     'crn': course.crn,
@@ -56,7 +55,7 @@ class Courses(Base):
     __tablename__ = "courses"
     id = Column(Integer, primary_key=True)
     crn = Column(Integer, unique=True, nullable=False)
-    title = Column(String(64), nullable=False)
+    title = Column(String(256), nullable=False)
     course_num = Column(String(5), nullable=False)
     section_num = Column(String(3), nullable=False)
     capacity = Column(Integer, nullable=False)
@@ -81,7 +80,7 @@ class Courses(Base):
                 }
 
 def start_sess():
-    Session = sessionmaker(bind=engine, autocommit=False)
+    Session = sessionmaker(bind=engine, autocommit=False, autoflush=False)
     return Session()
 
 def create_tables(sess=start_sess()):
